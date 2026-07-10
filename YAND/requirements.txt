@@ -1,0 +1,12 @@
+# Core runtime dependencies for YAND-MVSK Tail-Risk Studio.
+# Install with:  pip install -r requirements.txt
+numpy>=1.24
+pandas>=2.0
+scipy>=1.10
+fastapi>=0.110
+uvicorn[standard]>=0.27
+pydantic>=2.5
+
+# Optional: live market data (HK / US / A-share). The app runs fully offline
+# with deterministic synthetic data if this is absent.
+yfinance>=0.2.40

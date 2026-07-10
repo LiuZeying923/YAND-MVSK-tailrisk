@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "yand-mvsk"
+version = "0.1.0"
+description = "Higher-moment (MVSK) portfolio optimization via Yau's Affine-Normal Descent, with behavioral gamma calibration and a tail-risk guard."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "LiuZeying923" }]
+keywords = ["portfolio", "optimization", "mvsk", "tail-risk", "yand", "skewness", "kurtosis", "behavioral-finance"]
+
+dependencies = [
+    "numpy>=1.24",
+    "pandas>=2.0",
+    "scipy>=1.10",
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.27",
+    "pydantic>=2.5",
+]
+
+[project.optional-dependencies]
+market = ["yfinance>=0.2.40"]
+dev = ["pytest>=8.0", "pytest-cov>=4.0", "httpx>=0.27"]
+
+[project.scripts]
+yand-mvsk = "yand_mvsk.cli:main"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-q"

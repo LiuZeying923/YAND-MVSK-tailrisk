@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>YAND-MVSK · Tail-Risk Studio</title>
+  <meta name="description" content="Higher-moment portfolio optimization with behavioral risk calibration and a tail-risk guard, across HK / US / A-share markets." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2314171f'/%3E%3Ctext x='16' y='22' font-size='16' font-family='monospace' fill='white' text-anchor='middle'%3E%CE%B3%3C/text%3E%3C/svg%3E" />
+</head>
+<body>
+  <div class="app">
+    <header class="masthead">
+      <div class="brand">
+        <div class="mark"><span>γ</span></div>
+        <div>
+          <h1>YAND-MVSK Tail-Risk Studio</h1>
+          <div class="sub">Higher-moment optimization · behavioral calibration · tail-risk guard</div>
+        </div>
+      </div>
+      <div class="tag" id="conn-tag">HK · US · A-share</div>
+    </header>
+
+    <!-- HERO (step 0) -->
+    <section class="hero" id="hero">
+      <h2>Portfolios built for the tails, not just the average.</h2>
+      <p class="lede">
+        Markowitz stops at mean and variance. YAND-MVSK optimizes all four moments —
+        return, variance, skewness, kurtosis — using Yau's Affine-Normal Descent, then
+        calibrates your risk aversion from how you <em>actually</em> behave and stress-tests
+        the result against fat-tailed markets.
+      </p>
+      <div class="pills">
+        <span class="pill"><span class="dot"></span>4-moment convex objective</span>
+        <span class="pill"><span class="dot"></span>Behavioral γ (VBQ-5)</span>
+        <span class="pill"><span class="dot"></span>Tail-Risk Guard</span>
+        <span class="pill"><span class="dot"></span>Runs fully offline</span>
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" id="start-btn">Start — build my portfolio →</button>
+        <a class="btn btn-ghost" href="/docs" target="_blank">API docs</a>
+      </div>
+    </section>
+
+    <!-- STEPPER -->
+    <nav class="stepper hidden" id="stepper" aria-label="Progress">
+      <button class="step" data-step="1"><span class="num">1</span> Risk profile</button>
+      <span class="step-sep"></span>
+      <button class="step" data-step="2"><span class="num">2</span> Choose stocks</button>
+      <span class="step-sep"></span>
+      <button class="step" data-step="3"><span class="num">3</span> Results</button>
+    </nav>
+
+    <!-- STEP 1: QUESTIONNAIRE -->
+    <section class="stack hidden" id="step-1">
+      <div class="panel" style="padding:22px 24px">
+        <div class="section-title">Visual Behavioral Questionnaire · VBQ-5</div>
+        <p style="color:var(--ink-soft); font-size:14.5px; margin-top:8px; max-width:70ch">
+          Five scenario questions detect loss aversion, the disposition effect and overconfidence —
+          the biases that make stated risk tolerance unreliable. Your answers set the risk-aversion
+          parameter <b>γ</b> that drives the optimizer.
+        </p>
+      </div>
+      <div id="questions" class="stack"></div>
+      <div class="panel gamma-preview" id="gamma-preview">
+        <div class="gamma-big"><span class="val" id="gp-val">6.0</span><span class="lab">γ</span></div>
+        <div class="gamma-meta">
+          <div class="gamma-profile" id="gp-profile">Moderate</div>
+          <div class="gamma-blurb" id="gp-blurb">Answer the questions to calibrate your risk aversion.</div>
+        </div>
+        <div class="gamma-track">
+          <div class="gamma-bar"><div class="gamma-knob" id="gp-knob" style="left:30%"></div></div>
+          <div class="gamma-scale"><span>Aggressive · 1.5</span><span>Moderate</span><span>Conservative · 20</span></div>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-ghost" id="skip-q">Skip · use γ = 6</button>
+        <div class="grow"></div>
+        <button class="btn btn-primary" id="to-step-2" disabled>Choose stocks →</button>
+      </div>
+    </section>
+
+    <!-- STEP 2: PICKER -->
+    <section class="hidden" id="step-2">
+      <div class="picker-grid">
+        <div class="panel search-wrap">
+          <div class="section-title" style="margin-bottom:14px">Pick your stickers</div>
+          <div class="search-box">
+            <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+            <input id="search" type="text" placeholder="Search ticker or name — AAPL, Tencent, Moutai…" autocomplete="off" />
+          </div>
+          <div class="mkt-tabs" id="mkt-tabs">
+            <button class="mkt-tab active" data-mkt="all">All markets</button>
+            <button class="mkt-tab" data-mkt="US">US</button>
+            <button class="mkt-tab" data-mkt="HK">Hong Kong</button>
+            <button class="mkt-tab" data-mkt="A">A-share</button>
+          </div>
+          <div class="asset-list" id="asset-list"></div>
+        </div>
+
+        <div class="panel selected-panel">
+          <div class="section-title">Your basket · <span id="sel-count">0</span></div>
+          <div class="chips" id="chips"><span class="empty-hint">Add 2–15 stocks to optimize.</span></div>
+
+          <div class="settings">
+            <div class="field">
+              <label>Max weight per stock <span class="val-badge" id="mw-val">35%</span></label>
+              <input type="range" id="max-weight" min="10" max="100" step="5" value="35" />
+              <div class="hint">Caps concentration. Lower = more diversified.</div>
+            </div>
+            <div class="field">
+              <label>Holding horizon</label>
+              <div class="seg" id="horizon-seg">
+                <button data-h="5">1 week</button>
+                <button data-h="21" class="active">1 month</button>
+                <button data-h="63">1 quarter</button>
+              </div>
+              <div class="hint">Longer horizons make skew &amp; kurtosis meaningful.</div>
+            </div>
+            <div class="field toggle-row">
+              <div>
+                <label style="display:block">Offline demo data</label>
+                <div class="hint">Deterministic synthetic prices — instant, no network.</div>
+              </div>
+              <label class="switch"><input type="checkbox" id="offline-toggle" /><span class="slide"></span></label>
+            </div>
+          </div>
+
+          <div class="actions" style="margin-top:20px">
+            <button class="btn btn-ghost" id="back-1">← Back</button>
+            <button class="btn btn-primary grow" id="optimize-btn" disabled>Optimize portfolio</button>
+          </div>
+          <div id="opt-banner"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 3: RESULTS -->
+    <section class="stack hidden" id="step-3">
+      <div id="results"></div>
+      <div class="actions">
+        <button class="btn btn-ghost" id="back-2">← Adjust basket</button>
+        <div class="grow"></div>
+        <button class="btn btn-ghost" id="restart">Start over</button>
+      </div>
+    </section>
+
+    <footer class="foot">
+      YAND-MVSK Tail-Risk Studio · a research/education tool, not investment advice.<br/>
+      Built on Yau's Affine-Normal Descent
+      (<a href="https://arxiv.org/abs/2604.25378" target="_blank">arXiv:2604.25378</a>) ·
+      MVSK tilting (Boudt et al. 2020) · High-order portfolios (Wang, Zhou, Ying, Palomar 2023).
+    </footer>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
