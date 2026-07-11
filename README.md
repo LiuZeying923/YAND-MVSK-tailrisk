@@ -60,13 +60,13 @@ A minimal, single-page web app (vanilla JS, no build step, hand-rolled SVG chart
 ### Screenshots
 
 <p align="center">
-  <img src="pho/p1" alt="tailrisk" width="200" />
+  <img src="pho/p1.png" alt="tailrisk" width="200" />
 </p>
 <p align="center">
-  <img src="pho/p2" alt="tailrisk" width="200" />
+  <img src="pho/p2.png" alt="tailrisk" width="200" />
 </p>
 <p align="center">
-  <img src="pho/p3" alt="tailrisk" width="200" />
+  <img src="pho/p3.png" alt="tailrisk" width="200" />
 </p>
 ---
 
